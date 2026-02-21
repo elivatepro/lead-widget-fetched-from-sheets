@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Average</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 280px;
+    min-width: 120px;
+    background: linear-gradient(145deg, #0f172a, #1e293b);
+    border-radius: 16px;
+    padding: clamp(14px, 5vw, 24px);
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.25),
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -30%;
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .label {
+    font-size: clamp(10px, 2.5vw, 12px);
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+
+  .value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .value {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(32px, 10vw, 56px);
+    font-weight: 800;
+    color: #f1f5f9;
+    line-height: 1;
+    letter-spacing: -1px;
+    transition: opacity 0.4s ease;
+  }
+
+  .value.loading {
+    opacity: 0.3;
+  }
+
+  .unit {
+    font-size: clamp(11px, 2.5vw, 13px);
+    font-weight: 500;
+    color: #64748b;
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: #22d3ee;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 6px;
+    vertical-align: middle;
+    animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+  }
+
+  .status {
+    margin-top: 10px;
+    font-size: clamp(9px, 2vw, 11px);
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card { animation: fadeIn 0.5s ease-out; }
+
+  .error-msg {
+    font-size: 12px;
+    color: #f87171;
+    margin-top: 6px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="label">Lead Average</div>
+  <div class="value-row">
+    <div class="value loading" id="leadValue">—</div>
+    <span class="unit" id="unitLabel">mins</span>
+  </div>
+  <div class="status">
+    <span class="pulse-dot"></span>
+    <span>Live from sheet</span>
+  </div>
+  <div class="error-msg" id="errorMsg">Could not fetch data</div>
+</div>
+
+<script>
+  const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQl55_zuIPPpCENgWeXuKGHd8zBEluRJCqnx-PYd2FexDMt1qkYfOnw_Z7quMsNGkqnY4wyNmhlXEwq/pub?gid=0&single=true&output=csv';
+
+  const valueEl = document.getElementById('leadValue');
+  const errorEl = document.getElementById('errorMsg');
+
+  async function fetchValue() {
+    try {
+      const res = await fetch(SHEET_CSV_URL);
+      if (!res.ok) throw new Error('Fetch failed');
+      const text = await res.text();
+
+      // Parse CSV — grab the first numeric value
+      const cells = text.split(/[\n,]/).map(c => c.trim().replace(/"/g, '')).filter(Boolean);
+      const numericValue = cells.find(c => !isNaN(c) && c !== '');
+
+      if (numericValue !== undefined) {
+        valueEl.textContent = numericValue;
+        valueEl.classList.remove('loading');
+      } else {
+        throw new Error('No numeric value found');
+      }
+    } catch (err) {
+      console.error(err);
+      valueEl.textContent = '—';
+      errorEl.style.display = 'block';
+    }
+  }
+
+  fetchValue();
+  // Auto-refresh every 5 minutes
+  setInterval(fetchValue, 5 * 60 * 1000);
+</script>
+
+</body>
+</html>
