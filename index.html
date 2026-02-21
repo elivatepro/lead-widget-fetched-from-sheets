@@ -22,22 +22,21 @@
     justify-content: center;
   }
 
-  .card-link {
+.card-link {
     text-decoration: none;
     color: inherit;
     cursor: pointer;
-    display: block;
-    width: 100%;
+    display: inline-block;
     transition: transform 0.2s ease;
-  }
+}
 
   .card-link:hover { transform: scale(1.02); }
 
-  .card {
-    width: 100%;
+.card {
+    width: fit-content;
     background: linear-gradient(145deg, #0f172a, #1e293b);
-    border-radius: 16px;
-    padding: clamp(14px, 5vw, 24px);
+    border-radius: 12px;
+    padding: 12px 16px;
     position: relative;
     overflow: hidden;
     box-shadow:
