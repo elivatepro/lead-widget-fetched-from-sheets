@@ -20,13 +20,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px;
   }
+
+  .card-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    transition: transform 0.2s ease;
+  }
+
+  .card-link:hover { transform: scale(1.02); }
 
   .card {
     width: 100%;
-    max-width: 280px;
-    min-width: 120px;
     background: linear-gradient(145deg, #0f172a, #1e293b);
     border-radius: 16px;
     padding: clamp(14px, 5vw, 24px);
@@ -128,6 +136,7 @@
 </head>
 <body>
 
+<a href="https://bokoisaac.pro" target="_blank" rel="noopener" class="card-link">
 <div class="card">
   <div class="label">Lead Average</div>
   <div class="value-row">
@@ -140,6 +149,7 @@
   </div>
   <div class="error-msg" id="errorMsg">Could not fetch data</div>
 </div>
+</a>
 
 <script>
   const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQl55_zuIPPpCENgWeXuKGHd8zBEluRJCqnx-PYd2FexDMt1qkYfOnw_Z7quMsNGkqnY4wyNmhlXEwq/pub?gid=0&single=true&output=csv';
@@ -153,7 +163,6 @@
       if (!res.ok) throw new Error('Fetch failed');
       const text = await res.text();
 
-      // Parse CSV — grab the first numeric value
       const cells = text.split(/[\n,]/).map(c => c.trim().replace(/"/g, '')).filter(Boolean);
       const numericValue = cells.find(c => !isNaN(c) && c !== '');
 
@@ -171,8 +180,7 @@
   }
 
   fetchValue();
-  // Auto-refresh every 5 minutes
-  setInterval(fetchValue, 5 * 60 * 1000);
+  setInterval(fetchValue, 1 * 60 * 1000);
 </script>
 
 </body>
